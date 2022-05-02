@@ -148,7 +148,9 @@ function fncGetProductList(currentPage){
 		<td class="ct_line02"></td>
 		<td class="ct_list_b" width="150">가격</td>
 		<td class="ct_line02"></td>
-		<td class="ct_list_b">등록일</td>	
+		<td class="ct_list_b">등록일</td>
+		<td class="ct_line02"></td>
+		<td class="ct_list_b">현재상태</td>	
 				
 	</tr>
 	<tr>
@@ -180,6 +182,7 @@ function fncGetProductList(currentPage){
 		<td colspan="11" bgcolor="D6D7D6" height="1"></td>
 	</tr>
 	<% } %>/////////////////////// EL / JSTL 적용으로 주석 처리 //////////////////////// --%>
+	<c:set var="tranNo" value="0" />
 	<c:set var="i" value="0" />
 	<c:forEach var="product" items="${list}">
 		<c:set var="i" value="${ i+1 }" />
@@ -187,8 +190,11 @@ function fncGetProductList(currentPage){
 			<td align="center">${ i }</td>
 			<td></td>
 			<td align="left">
-			<c:if test = "${param.menu eq 'search'}">
+			<c:if test = "${param.menu eq 'search' && product.proTranCode == '판매중'}">
 			<a href="/getProduct.do?menu=search&prodNo=${product.prodNo}">${product.prodName}</a>
+			</c:if>
+			<c:if test="${param.menu eq 'search' && product.proTranCode != '판매중'}">
+			${product.prodName}
 			</c:if>
 			<c:if test = "${param.menu eq 'manage'}">
 			<a href="/getProduct.do?menu=manage&prodNo=${product.prodNo}">${product.prodName}</a>
@@ -198,7 +204,22 @@ function fncGetProductList(currentPage){
 			<td align="left">${product.price}</td>
 			<td></td>
 			<td align="left">${product.regDate}
-			</td>		
+			</td>
+			<td></td>
+			<td align="left">	
+			<c:if test="${param.menu eq 'search' && product.proTranCode ne '판매중'}">
+			재고없음
+			</c:if>
+			<c:if test="${param.menu eq 'search' && product.proTranCode eq '판매중'}">
+			${product.proTranCode}
+			</c:if>
+			<c:if test="${param.menu eq 'manage'}">
+			${product.proTranCode}
+				<c:if test="${product.proTranCode eq '구매완료'}">
+				<a href="/updateTranCode.do?tranNo= ${tranNo}">배송하기</a>
+				</c:if>
+			</c:if>
+			</td>
 		</tr>
 		<tr>
 		<td colspan="11" bgcolor="D6D7D6" height="1"></td>

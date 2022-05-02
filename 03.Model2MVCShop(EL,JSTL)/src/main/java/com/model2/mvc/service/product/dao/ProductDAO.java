@@ -97,17 +97,18 @@ public class ProductDAO {
 		Connection con = DBUtil.getConnection();
 
 		// Original Query 구성
-		String sql = "select * from PRODUCT ";
+		String sql = "SELECT p.prod_no, p.prod_name, p.prod_detail, p.manufacture_day, p.price, p.image_file, p.reg_date, t.tran_status_code, t.tran_no"
+					+ " FROM product p, transaction t WHERE p.prod_no = t.prod_no(+) ";
 		
 		if (search.getSearchCondition() != null) {
 			if (search.getSearchCondition().equals("0") && !search.getSearchKeyword().equals("")) {
-				sql += " where PROD_NO=" + search.getSearchKeyword();
+				sql += " and p.PROD_NO=" + search.getSearchKeyword();
 			} else if (search.getSearchCondition().equals("1") && !search.getSearchKeyword().equals("")) {
-				sql += " where lower(PROD_NAME) LIKE lower('%" + search.getSearchKeyword() + "%')";
+				sql += " and lower(p.prod_name) LIKE lower('%" + search.getSearchKeyword() + "%')";
 			}
 		}
 		
-		sql += " order by PROD_NO";
+		sql += " order by p.prod_no";
 
 		System.out.println("ProductDAO::Original SQL :: " + sql);
 
@@ -123,6 +124,7 @@ public class ProductDAO {
 		System.out.println(search);
 
 		List<Product> list = new ArrayList<Product>();
+		List<Integer> tranNoList = new ArrayList<Integer>();
 
 		while (rs.next()) {
 			Product product = new Product();
@@ -133,6 +135,20 @@ public class ProductDAO {
 			product.setPrice(rs.getInt("PRICE"));
 			product.setFileName(rs.getString("IMAGE_FILE"));
 			product.setRegDate(rs.getDate("REG_DATE"));
+			
+			if("aaa".equals(rs.getString("tran_status_code"))) {
+				product.setProTranCode("구매완료");
+				tranNoList.add(rs.getInt("tran_no"));
+				
+			}else if("bbb".equals(rs.getString("tran_status_code"))) {
+				product.setProTranCode("배송중");
+				tranNoList.add(rs.getInt("tran_no"));
+				
+			}else if("ccc".equals(rs.getString("tran_status_code"))) {
+				product.setProTranCode("배송완료");
+				tranNoList.add(rs.getInt("tran_no"));
+			}else {tranNoList.add(rs.getInt("tran_no"));}
+			
 			list.add(product);
 		}
 
@@ -140,6 +156,8 @@ public class ProductDAO {
 		map.put("totalCount", new Integer(totalCount));
 		// ==> currentPage 의 게시물 정보 갖는 List 저장
 		map.put("list", list);
+		
+		map.put("tranNoList", tranNoList);
 
 		rs.close();
 		pStmt.close();
